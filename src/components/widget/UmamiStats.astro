@@ -11,7 +11,7 @@ const { class: className, style } = Astro.props;
 <WidgetLayout name="统计" id="umami-stats" class:list={[className]} {style}>
     <div class="text-center py-2">
         <div class="text-3xl font-bold text-neutral-900 dark:text-neutral-100" id="total-pageviews">-</div>
-        <div class="text-sm text-neutral-500 dark:text-neutral-400">浏览量</div>
+        <div class="text-sm text-neutral-500 dark:text-neutral-400">总浏览量</div>
     </div>
     <div class="grid grid-cols-2 divide-x divide-neutral-200 dark:divide-neutral-700 text-center pt-2">
         <div class="px-2">
@@ -27,72 +27,352 @@ const { class: className, style } = Astro.props;
 
 <script>
 const UMAMI_CONFIG = {
-    baseUrl: 'http://ipv4.1zyq1.top:3000/api', // 如果是自托管，替换为你的域名
-    websiteId: '431a82f2-0ee9-45b8-b069-7f331c41ffbc', // 替换为你的 websiteId
-    shareToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ3ZWJzaXRlSWQiOiI0MzFhODJmMi0wZWU5LTQ1YjgtYjA2OS03ZjMzMWM0MWZmYmMiLCJpYXQiOjE3NTk4NTUwMjV9.LUijBrrrcVrUyTcVcPj6_Hynh-YOlJdnozZRB2qwWCQ' // 替换为你的 token
+    baseUrl: 'https://umami.1zyq1.top/api',
+    websiteId: '431a82f2-0ee9-45b8-b069-7f331c41ffbc',
+    shareToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ3ZWJzaXRlSWQiOiI0MzFhODJmMi0wZWU5LTQ1YjgtYjA2OS03ZjMzMWM0MWZmYmMiLCJpYXQiOjE3NjA1Mzc0OTV9.ZESuw8IDFUtOeZpIu6oe8xPDOtQn01FWw0Z7DhgO864'
 };
 
-function formatNumber(num: number): string {
-    if (num >= 1000000) {
-        return (num / 1000000).toFixed(1) + 'M';
-    } else if (num >= 1000) {
-        return (num / 1000).toFixed(1) + 'K';
+// 默认统计数据
+const DEFAULT_STATS = {
+    pageviews: 0,
+    visits: 0,
+    visitors: 0
+};
+
+function formatNumber(num) {
+    // 确保输入是数字
+    const numberValue = Number(num);
+    if (isNaN(numberValue)) {
+        return '0';
     }
-    return num.toString();
+    
+    if (numberValue >= 1000000) {
+        return (numberValue / 1000000).toFixed(1) + 'M';
+    } else if (numberValue >= 1000) {
+        return (numberValue / 1000).toFixed(1) + 'K';
+    }
+    return numberValue.toString();
 }
 
-async function fetchUmamiStats() {
+function updateStatsDisplay(pageviews, visits, visitors) {
+    const pageviewsElement = document.getElementById('total-pageviews');
+    const visitsElement = document.getElementById('total-visits');
+    const visitorsElement = document.getElementById('total-visitors');
+
+    console.log('更新显示 - 页面浏览量:', pageviews, '类型:', typeof pageviews);
+    console.log('更新显示 - 访问数:', visits, '类型:', typeof visits);
+    console.log('更新显示 - 游客数:', visitors, '类型:', typeof visitors);
+
+    if (pageviewsElement) {
+        pageviewsElement.textContent = formatNumber(pageviews);
+        pageviewsElement.classList.remove('text-red-500', 'text-neutral-400');
+    }
+
+    if (visitsElement) {
+        visitsElement.textContent = formatNumber(visits);
+        visitsElement.classList.remove('text-red-500', 'text-neutral-400');
+    }
+
+    if (visitorsElement) {
+        visitorsElement.textContent = formatNumber(visitors);
+        visitorsElement.classList.remove('text-red-500', 'text-neutral-400');
+    }
+}
+
+function saveStatsToCache(stats) {
     try {
-        const endAt = Date.now();
-        const startAt = 0;
+        const cacheData = {
+            ...stats,
+            timestamp: Date.now()
+        };
+        localStorage.setItem('umami_stats_cache', JSON.stringify(cacheData));
+    } catch (error) {
+        console.warn('无法保存统计数据到缓存:', error);
+    }
+}
 
-        const url = `${UMAMI_CONFIG.baseUrl}/websites/${UMAMI_CONFIG.websiteId}/stats?startAt=${startAt}&endAt=${endAt}&unit=hour&timezone=Asia/Hong_Kong`;
+function getStatsFromCache() {
+    try {
+        const cached = localStorage.getItem('umami_stats_cache');
+        if (cached) {
+            const data = JSON.parse(cached);
+            // 检查缓存是否在1小时内
+            if (Date.now() - data.timestamp < 3600000) {
+                return data;
+            }
+        }
+    } catch (error) {
+        console.warn('无法从缓存读取统计数据:', error);
+    }
+    return null;
+}
 
+function showErrorState() {
+    const elements = ['total-pageviews', 'total-visits', 'total-visitors'];
+    elements.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = '-';
+            element.classList.add('text-neutral-400');
+        }
+    });
+}
+
+// 调试函数：打印完整的API响应
+function debugApiResponse(data, endpoint) {
+    console.group('Umami API 调试信息');
+    console.log('端点:', endpoint);
+    console.log('完整响应:', data);
+    console.log('响应类型:', typeof data);
+    if (Array.isArray(data)) {
+        console.log('数组长度:', data.length);
+        data.forEach((item, index) => {
+            console.log(`项目 ${index}:`, item);
+        });
+    } else if (typeof data === 'object') {
+        Object.keys(data).forEach(key => {
+            console.log(`字段 ${key}:`, data[key], '类型:', typeof data[key]);
+        });
+    }
+    console.groupEnd();
+}
+
+// 确保提取的数字值是真正的数字
+function ensureNumber(value) {
+    if (typeof value === 'number') return value;
+    if (typeof value === 'string') {
+        const num = parseInt(value, 10);
+        return isNaN(num) ? 0 : num;
+    }
+    if (value && typeof value === 'object') {
+        console.warn('发现对象值，尝试提取数字:', value);
+        // 尝试从对象中提取数字值
+        if (value.value !== undefined) return ensureNumber(value.value);
+        if (value.y !== undefined) return ensureNumber(value.y);
+        if (value.count !== undefined) return ensureNumber(value.count);
+    }
+    return 0;
+}
+
+// 主要的API调用函数
+async function fetchStatsFromUmami() {
+    const endAt = Date.now();
+    const startAt = 0; // 从开始时间到现在
+    
+    const url = `${UMAMI_CONFIG.baseUrl}/websites/${UMAMI_CONFIG.websiteId}/stats?startAt=${startAt}&endAt=${endAt}&unit=day`;
+    
+    try {
+        console.log('正在请求Umami统计数据...', url);
         const response = await fetch(url, {
             method: 'GET',
             headers: {
-                'x-umami-share-token': UMAMI_CONFIG.shareToken,
-                'Content-Type': 'application/json'
+                'accept': 'application/json',
+                'x-umami-share-token': UMAMI_CONFIG.shareToken
             }
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`HTTP错误: ${response.status}`);
         }
 
         const data = await response.json();
-        const pageviewsElement = document.getElementById('total-pageviews');
-        const visitsElement = document.getElementById('total-visits');
-        const visitorsElement = document.getElementById('total-visitors');
-
-        if (pageviewsElement) {
-            pageviewsElement.textContent = formatNumber(data.pageviews?.value || 0);
-        }
-
-        if (visitsElement) {
-            visitsElement.textContent = formatNumber(data.visits?.value || 0);
-        }
-
-        if (visitorsElement) {
-            visitorsElement.textContent = formatNumber(data.visitors?.value || 0);
-        }
-
+        debugApiResponse(data, url); // 调试输出
+        
+        return data;
     } catch (error) {
-        console.error('获取Umami统计数据失败:', error);
-        const elements = ['total-pageviews', 'total-visits', 'total-visitors'];
-        elements.forEach(id => {
-            const element = document.getElementById(id);
-            if (element) {
-                element.textContent = '获取失败';
-                element.classList.add('text-red-500');
-            }
-        });
+        console.error('Umami API请求失败:', error);
+        throw error;
     }
 }
 
-document.addEventListener('DOMContentLoaded', fetchUmamiStats);
+// 备用API端点：获取指标数据
+async function fetchMetricsFromUmami() {
+    const url = `${UMAMI_CONFIG.baseUrl}/websites/${UMAMI_CONFIG.websiteId}/metrics`;
+    
+    try {
+        console.log('尝试备用端点（指标）...', url);
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'accept': 'application/json',
+                'x-umami-share-token': UMAMI_CONFIG.shareToken
+            }
+        });
 
-if (window.swup) {
-    window.swup.hooks.on('page:view', fetchUmamiStats);
+        if (!response.ok) {
+            throw new Error(`HTTP错误: ${response.status}`);
+        }
+
+        const data = await response.json();
+        debugApiResponse(data, url); // 调试输出
+        
+        return data;
+    } catch (error) {
+        console.error('备用端点请求失败:', error);
+        throw error;
+    }
+}
+
+// 解析统计数据 - 修复对象问题
+function extractStatsFromData(data) {
+    console.log('开始解析数据...', data);
+    
+    const stats = { 
+        pageviews: ensureNumber(0), 
+        visits: ensureNumber(0), 
+        visitors: ensureNumber(0) 
+    };
+    
+    // 如果数据是数组（可能是指标端点）
+    if (Array.isArray(data)) {
+        console.log('检测到数组格式数据');
+        
+        data.forEach(item => {
+            if (item && typeof item === 'object') {
+                // 处理指标格式
+                if (item.name === 'pageviews' || item.x === 'pageview' || item.type === 'pageview') {
+                    stats.pageviews = ensureNumber(item.value || item.y || item.count);
+                } else if (item.name === 'visits' || item.x === 'visit' || item.type === 'visit') {
+                    stats.visits = ensureNumber(item.value || item.y || item.count);
+                } else if (item.name === 'visitors' || item.x === 'visitor' || item.type === 'visitor') {
+                    stats.visitors = ensureNumber(item.value || item.y || item.count);
+                }
+            }
+        });
+    }
+    // 如果数据是对象
+    else if (typeof data === 'object' && data !== null) {
+        console.log('检测到对象格式数据');
+        
+        // 直接包含统计字段
+        if (data.pageviews !== undefined) {
+            stats.pageviews = ensureNumber(data.pageviews);
+        }
+        if (data.visits !== undefined) {
+            stats.visits = ensureNumber(data.visits);
+        }
+        if (data.visitors !== undefined) {
+            stats.visitors = ensureNumber(data.visitors);
+        }
+        
+        // 备用字段名
+        if (data.pageview !== undefined) {
+            stats.pageviews = ensureNumber(data.pageview);
+        }
+        if (data.views !== undefined) {
+            stats.pageviews = ensureNumber(data.views);
+        }
+        if (data.sessions !== undefined) {
+            stats.visits = ensureNumber(data.sessions);
+        }
+        if (data.uniqueVisitors !== undefined) {
+            stats.visitors = ensureNumber(data.uniqueVisitors);
+        }
+        
+        // 包含在 stats 字段中
+        if (data.stats && typeof data.stats === 'object') {
+            if (data.stats.pageviews !== undefined) {
+                stats.pageviews = ensureNumber(data.stats.pageviews);
+            }
+            if (data.stats.visits !== undefined) {
+                stats.visits = ensureNumber(data.stats.visits);
+            }
+            if (data.stats.visitors !== undefined) {
+                stats.visitors = ensureNumber(data.stats.visitors);
+            }
+        }
+    }
+    
+    console.log('最终解析的统计数据:', stats);
+    console.log('数据类型检查 - pageviews:', typeof stats.pageviews, 'visits:', typeof stats.visits, 'visitors:', typeof stats.visitors);
+    
+    return stats;
+}
+
+// 尝试多种端点获取数据
+async function tryMultipleEndpoints() {
+    try {
+        // 首先尝试主端点
+        return await fetchStatsFromUmami();
+    } catch (error) {
+        console.log('主端点失败，尝试备用端点...');
+        // 主端点失败，尝试指标端点
+        return await fetchMetricsFromUmami();
+    }
+}
+
+async function fetchUmamiStats() {
+    try {
+        // 首先尝试从缓存获取
+        const cachedStats = getStatsFromCache();
+        if (cachedStats) {
+            console.log('使用缓存的统计数据');
+            updateStatsDisplay(cachedStats.pageviews, cachedStats.visits, cachedStats.visitors);
+        }
+
+        // 显示加载状态
+        updateStatsDisplay('...', '...', '...');
+
+        // 从API获取最新数据
+        console.log('开始获取Umami统计数据...');
+        const data = await tryMultipleEndpoints();
+        
+        const stats = extractStatsFromData(data);
+        console.log('API返回的最终统计数据:', stats);
+
+        // 更新显示
+        updateStatsDisplay(stats.pageviews, stats.visits, stats.visitors);
+        
+        // 保存到缓存
+        saveStatsToCache(stats);
+        
+        return stats;
+
+    } catch (error) {
+        console.error('获取Umami统计数据失败:', error);
+        
+        // 如果有缓存数据，即使过期也使用
+        const cachedStats = getStatsFromCache();
+        if (cachedStats && cachedStats.pageviews > 0) {
+            console.log('API失败，使用过期的缓存数据');
+            updateStatsDisplay(cachedStats.pageviews, cachedStats.visits, cachedStats.visitors);
+        } else {
+            // 没有缓存，显示错误状态
+            showErrorState();
+        }
+        
+        return DEFAULT_STATS;
+    }
+}
+
+// 初始化
+document.addEventListener('DOMContentLoaded', function() {
+    // 延迟加载，避免阻塞页面渲染
+    setTimeout(fetchUmamiStats, 500);
+});
+
+// Swup 支持
+if (typeof window !== 'undefined' && window.swup) {
+    window.swup.hooks.on('page:view', function() {
+        setTimeout(fetchUmamiStats, 1000);
+    });
 }
 </script>
+
+<style>
+/* 添加加载动画 */
+#total-pageviews,
+#total-visits,
+#total-visitors {
+    transition: all 0.3s ease;
+}
+
+/* 加载状态 */
+.loading {
+    opacity: 0.6;
+}
+
+/* 错误状态样式 */
+.text-neutral-400 {
+    opacity: 0.6;
+}

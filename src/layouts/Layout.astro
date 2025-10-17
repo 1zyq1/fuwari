@@ -70,14 +70,20 @@ const bannerOffsetByPosition = {
 };
 const bannerOffset =
 	bannerOffsetByPosition[siteConfig.banner.position || "center"];
+
+// 获取背景配置
+const bgConfig = siteConfig.background;
+// 获取UI透明度设置
+const uiOpacity = typeof window !== 'undefined' ? localStorage.getItem('ui-opacity') || '0.95' : '0.95';
 ---
 
 <!DOCTYPE html>
-<html lang={siteLang} class="bg-[var(--page-bg)] transition text-[14px] md:text-[16px]"
+<html lang={siteLang} class="transition text-[14px] md:text-[16px]"
 	  data-overlayscrollbars-initialize
 >
 	<head>
-
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6881527283749819"
+     crossorigin="anonymous"></script>
 		<title>{pageTitle}</title>
 
 		<meta charset="UTF-8" />
@@ -101,6 +107,7 @@ const bannerOffset =
 
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
+		<meta name="baidu-site-verification" content="codeva-vSuw8Wg7fg" />
 		{favicons.map(favicon => (
 			<link rel="icon"
 				  href={favicon.src.startsWith('/') ? url(favicon.src) : favicon.src}
@@ -132,6 +139,10 @@ const bannerOffset =
 			const hue = localStorage.getItem('hue') || configHue;
 			document.documentElement.style.setProperty('--hue', hue);
 
+			// Load UI opacity from local storage
+			const uiOpacity = localStorage.getItem('ui-opacity') || '0.95';
+			document.documentElement.style.setProperty('--ui-opacity', uiOpacity);
+
 			// calculate the --banner-height-extend, which needs to be a multiple of 4 to avoid blurry text
 			let offset = Math.floor(window.innerHeight * (BANNER_HEIGHT_EXTEND / 100));
 			offset = offset - offset % 4;
@@ -140,6 +151,7 @@ const bannerOffset =
 		<style define:vars={{
 			configHue,
 			'page-width': `${PAGE_WIDTH}rem`,
+			'ui-opacity': uiOpacity,
 		}}></style>  <!-- defines global css variables. This will be applied to <html> <body> and some other elements idk why -->
 
 
@@ -147,16 +159,39 @@ const bannerOffset =
 
 		<link rel="alternate" type="application/rss+xml" title={profileConfig.name} href={`${Astro.site}rss.xml`}/>
 
-	</head>
-	<body class=" min-h-screen transition " class:list={[{"lg:is-home": isHomePage, "enable-banner": enableBanner}]}
-		  data-overlayscrollbars-initialize
-	>
-		<ConfigCarrier></ConfigCarrier>
-		<slot />
+		<script async custom-element="amp-auto-ads"
+        src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
+		</script>
 
-		<!-- increase the page height during page transition to prevent the scrolling animation from jumping -->
-		<div id="page-height-extend" class="hidden h-[300vh]"></div>
-	</body>
+  </head>
+	
+	<!-- 添加全屏背景 -->
+	<body class="min-h-screen transition" 
+		  class:list={[{"lg:is-home": isHomePage, "enable-banner": enableBanner}]}
+		  data-overlayscrollbars-initialize
+		  style={bgConfig.enable ? `
+			background: url('${bgConfig.src}') ${bgConfig.position} / ${bgConfig.size} ${bgConfig.repeat} ${bgConfig.attachment};
+			background-color: var(--page-bg);
+		  ` : ''}
+	>
+    <amp-auto-ads type="adsense"
+            data-ad-client="ca-pub-6881527283749819">
+    </amp-auto-ads>
+    <!-- 灰色遮罩层 -->
+    {bgConfig.enable && (
+        <div class="fixed inset-0 z-[-1] bg-gray-900/60"></div>
+    )}
+		
+    <!-- 提高UI透明度 -->
+    <div class="content-container" style={`opacity: var(--ui-opacity, 0.01);`}>
+        <!-- 从 0.95 提高到 0.98 -->
+        <ConfigCarrier></ConfigCarrier>
+        <slot />
+    </div>
+
+    <div id="page-height-extend" class="hidden h-[300vh]"></div>
+<script defer src="https://umami.1zyq1.top/script.js" data-website-id="431a82f2-0ee9-45b8-b069-7f331c41ffbc"></script>
+</body>
 </html>
 
 <style is:global define:vars={{
@@ -166,6 +201,28 @@ const bannerOffset =
 }}>
 @tailwind components;
 @layer components {
+	/* 全屏背景样式 */
+	body {
+		position: relative;
+	}
+	
+	body::before {
+		content: '';
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		z-index: -1;
+		opacity: var(--bg-opacity, 0.5);
+	}
+	
+	.content-container {
+		position: relative;
+		z-index: 1;
+	}
+
+	/* 原有样式保持不变 */
 	.enable-banner.is-home #banner-wrapper {
 		@apply h-[var(--banner-height-home)] translate-y-[var(--banner-height-extend)]
 	}
@@ -191,8 +248,31 @@ const bannerOffset =
 	.navbar-hidden {
 		@apply opacity-0 -translate-y-16
 	}
+	
+	/* 为各个UI组件添加透明度支持 */
+	#navbar-wrapper {
+		opacity: var(--ui-opacity, 0.95);
+		backdrop-filter: blur(8px);
+	}
+	
+	#sidebar, .sidebar {
+		opacity: var(--ui-opacity, 0.95);
+		backdrop-filter: blur(5px);
+	}
+	
+	.card, .post-card, .content-card {
+		opacity: var(--ui-opacity, 0.95);
+		backdrop-filter: blur(3px);
+	}
+	
+	footer {
+		opacity: var(--ui-opacity, 0.9);
+		backdrop-filter: blur(5px);
+	}
 }
 </style>
+
+
 
 <script>
 import 'overlayscrollbars/overlayscrollbars.css';
@@ -211,6 +291,16 @@ import {
 	MAIN_PANEL_OVERLAPS_BANNER_HEIGHT
 } from "../constants/constants";
 import { siteConfig } from '../config';
+
+// 添加UI透明度控制函数
+function getUIOpacity() {
+    return localStorage.getItem('ui-opacity') || '0.95';
+}
+
+function setUIOpacity(opacity) {
+    localStorage.setItem('ui-opacity', opacity);
+    document.documentElement.style.setProperty('--ui-opacity', opacity);
+}
 
 /* Preload fonts */
 // (async function() {
@@ -284,6 +374,11 @@ function loadTheme() {
 
 function loadHue() {
 	setHue(getHue())
+}
+
+// 加载UI透明度设置
+function loadUIOpacity() {
+	setUIOpacity(getUIOpacity())
 }
 
 function initCustomScrollbar() {
@@ -367,6 +462,7 @@ function init() {
 	// disableAnimation()()		// TODO
 	loadTheme();
 	loadHue();
+	loadUIOpacity(); // 加载UI透明度
 	initCustomScrollbar();
 	showBanner();
 }
@@ -515,7 +611,7 @@ function createPhotoSwipe() {
 	lightbox = new PhotoSwipeLightbox({
 		gallery: ".custom-md img, #post-cover img",
 		pswpModule: () => pswp,
-		closeSVG: '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#ffffff"><path d="M480-424 284-228q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536-480l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480-424Z"/></svg>',
+		closeSVG: '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#ffffff"><path d="M480-424 284-228q-11-11-28-11t-28 11q-11 11-11 28t11 28l196 196-196 196q-11 11-11 28t11 28q11 11 28 11t28-11l196-196 196 196q11 11 28 11t28-11q11-11 11-28t-11-28L536-480l196-196q11-11 11-28t-11-28q-11-11-28-11t-28 11L480-424Z"/></svg>',
 		zoomSVG: '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#ffffff"><path d="M340-540h-40q-17 0-28.5-11.5T260-580q0-17 11.5-28.5T300-620h40v-40q0-17 11.5-28.5T380-700q17 0 28.5 11.5T420-660v40h40q17 0 28.5 11.5T500-580q0 17-11.5 28.5T460-540h-40v40q0 17-11.5 28.5T380-460q-17 0-28.5-11.5T340-500v-40Zm40 220q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l224 224q11 11 11 28t-11 28q-11 11-28 11t-28-11L532-372q-30 24-69 38t-83 14Zm0-80q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/></svg>',
 		padding: { top: 20, bottom: 20, left: 20, right: 20 },
 		wheelToZoom: true,
