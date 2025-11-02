@@ -2,7 +2,7 @@
 title: 在 Debian 12 上安装和配置 AdGuard Home 完整指南
 published: 2025-10-09T22:28:00.000Z
 updated: 2025-10-09T22:28:00.000Z
-description: 本指南详细介绍在 Debian 12 上安装和配置 AdGuard Home 的完整流程。从下载安装、设置系统服务，到配置DNS与过滤器，实现全网广告拦截与家庭网络安全管理。
+description: "获取在 Debian 12 上安装和配置 AdGuard Home 的终极指南。本教程涵盖从系统要求、官方脚本或手动安装，到配置 DNS、过滤器、防火墙及故障排除的完整流程，助您轻松实现全网广告拦截与家庭网络安全管理。"
 draft: false
 ---
 
