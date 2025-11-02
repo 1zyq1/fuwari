@@ -2,8 +2,7 @@
 title: 在 Debian 12 上安装和配置 AdGuard Home 完整指南
 published: 2025-10-09T22:28:00.000Z
 updated: 2025-10-09T22:28:00.000Z
-tags: ["debian", "adguard", "dns", "网络", "隐私保护"]
-description: 本文详细介绍如何利用 WireGuard 构建加密隧道，安全地在两台 VPS 之间挂载 NFS 共享文件系统，实现低成本、高性能的存储扩展。
+description: 本指南详细介绍在 Debian 12 上安装和配置 AdGuard Home 的完整流程。从下载安装、设置系统服务，到配置DNS与过滤器，实现全网广告拦截与家庭网络安全管理。
 draft: false
 ---
 
@@ -150,8 +149,8 @@ sudo systemctl status AdGuardHome
 
 相关资源：
 
-[AdGuard Home 官方文档](https://adguard.com/kb/zh-CN/))
+AdGuard Home 官方文档
 
-[AdGuard Home 过滤器订阅](https://github.com/217heidai/adblockfilters)
+AdGuard Home 过滤器订阅
 
 希望这个指南对您有帮助！如有任何问题，请参考官方文档或在相关社区寻求帮助。

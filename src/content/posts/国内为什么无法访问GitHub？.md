@@ -2,8 +2,7 @@
 title: 国内为什么无法访问GitHub？几个方法教你搞定
 published: 2025-10-7T20:12:00.000Z
 updated: 2025-10-7T20:12:00.000Z
-description: 本文详细分析了中国大陆无法访问GitHub的原因，并提供了多种实用的解决方案，包括修改hosts文件、使用加速工具等。
-image: /src/assets/images/github.webp
+description: 了解GitHub在中国大陆无法访问的深层原因。本文为您提供多种亲测有效的解决方案，从修改HOSTS文件到使用可靠的加速工具，助您稳定访问GitHub，高效进行开发工作。
 draft: false
 ---
 

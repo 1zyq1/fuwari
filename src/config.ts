@@ -33,7 +33,7 @@ export const siteConfig: SiteConfig = {
 		size: "cover", // 背景大小
 		repeat: "no-repeat", // 背景重复
 		attachment: "fixed", // 背景附着
-        opacity: 0.85, // 85% 不透明，背景清晰但仍有层次感
+		opacity: 0.85, // 85% 不透明，背景清晰但仍有层次感
 	},
 	toc: {
 		enable: true,
@@ -65,11 +65,6 @@ export const navBarConfig: NavBarConfig = {
 		{
 			name: "Openlist",
 			url: "https://openlist.1zyq1.top",
-			external: true,
-		},
-		{
-			name: "统计",
-			url: "https://umami.1zyq1.top/share/u2GksI6shcbEnv64/www.1zyq1.top",
 			external: true,
 		},
 	],

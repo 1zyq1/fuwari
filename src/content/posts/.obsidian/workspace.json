@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "通过 WireGuard 加密隧道安全访问 NFS 共享文件.md",
+                "file": "飞牛更新iscsi了！！！.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "通过 WireGuard 加密隧道安全访问 NFS 共享文件"
+              "title": "飞牛更新iscsi了！！！"
             }
           },
           {
@@ -27,16 +27,15 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Git 使用教程.md",
+                "file": "飞牛更新iscsi了！！！.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Git 使用教程"
+              "title": "飞牛更新iscsi了！！！"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -184,18 +183,19 @@
       "bases:创建新数据库": false
     }
   },
-  "active": "c085cb77899362bd",
+  "active": "77144d8eee78aeda",
   "lastOpenFiles": [
+    "image.png",
     "在 Debian 12 上安装和配置 AdGuard Home 完整指南.md",
     "通过 WireGuard 加密隧道安全访问 NFS 共享文件.md",
     "国内为什么无法访问GitHub？.md",
+    "飞牛更新iscsi了！！！.md",
     "Git 使用教程.md",
     "使用 AdGuard Home 搭建自用 DoH 服务.md",
     "src/assets/images.md",
     "src/assets",
     "src",
     "国内为什么无法访问GitHub？几个方法教你搞定.md",
-    "未命名.md",
     "未命名.base"
   ]
 }
