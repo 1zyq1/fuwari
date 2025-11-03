@@ -33,7 +33,7 @@ export const siteConfig: SiteConfig = {
 		size: "cover", // 背景大小
 		repeat: "no-repeat", // 背景重复
 		attachment: "fixed", // 背景附着
-		opacity: 0.85, // 85% 不透明，背景清晰但仍有层次感
+		opacity: 0.95, // 95% 不透明，背景清晰但仍有层次感 - 注意：此属性会影响整个元素的透明度，包括其内容。
 	},
 	toc: {
 		enable: true,
@@ -61,11 +61,6 @@ export const navBarConfig: NavBarConfig = {
 			name: "赞助",
 			url: "/donate/",
 			external: false,
-		},
-		{
-			name: "Openlist",
-			url: "https://openlist.1zyq1.top",
-			external: true,
 		},
 	],
 };
