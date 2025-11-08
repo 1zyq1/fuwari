@@ -30,6 +30,16 @@ export type SiteConfig = {
 			url?: string;
 		};
 	};
+	background: {
+		// Added background property
+		enable: boolean;
+		src: string;
+		position: string;
+		size: string;
+		repeat: string;
+		attachment: string;
+		opacity: number;
+	};
 	toc: {
 		enable: boolean;
 		depth: 1 | 2 | 3;
