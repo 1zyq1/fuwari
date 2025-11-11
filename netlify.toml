@@ -1,0 +1,13 @@
+[build]
+  publish = dist
+
+[[plugins]]
+  package = netlify-plugin-cache
+  [plugins.inputs]
+  paths = [node_modules, .cache, public]
+
+[[plugins]]
+  package = netlify-plugin-image-optim
+
+[[plugins]]
+  package = netlify-plugin-minify-html
