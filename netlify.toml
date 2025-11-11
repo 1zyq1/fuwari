@@ -1,13 +1,13 @@
 [build]
-  publish = dist
+  publish = "public"  # 确保这行有闭合引号
 
 [[plugins]]
-  package = netlify-plugin-cache
+  package = "netlify-plugin-cache"
   [plugins.inputs]
-  paths = [node_modules, .cache, public]
+  paths = ["node_modules", ".cache", "public"]
+
+[[plugins]]  # 确保这是双括号，且前后没有空格
+  package = "netlify-plugin-image-optim"
 
 [[plugins]]
-  package = netlify-plugin-image-optim
-
-[[plugins]]
-  package = netlify-plugin-minify-html
+  package = "netlify-plugin-minify-html"
