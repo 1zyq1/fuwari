@@ -194,22 +194,18 @@ const uiOpacity =
 
     <div id="page-height-extend" class="hidden h-[300vh]"></div>
 <script defer src="https://umami.1zyq1.top/script.js" data-website-id="5495a41f-cb18-43be-b347-579bb46ea0e8"></script>
-<!-- 引入 CSS 文件 -->
-<link rel="stylesheet" href="https://api.hypcvgm.top/NeteaseMiniPlayer/netease-mini-player-v2.css">
-
-<!-- 引入 JS 文件 -->
-<script src="https://api.hypcvgm.top/NeteaseMiniPlayer/netease-mini-player-v2.js"></script>
-
-<!-- 浮动在页面左下角 -->
 <div class="netease-mini-player"
      data-playlist-id="17445008262"
      data-embed="false"
      data-position="bottom-left"
      data-lyric="true"
-     data-theme="auto">
-
-	 
+     data-theme="auto"
+     data-autoplay="true">
 </div>
+<!-- 引入 CSS 文件 -->
+<link rel="stylesheet" href="https://api.hypcvgm.top/NeteaseMiniPlayer/netease-mini-player-v2.css">
+<!-- 引入 JS 文件 -->
+<script is:inline src="/netease-mini-player-v2.js"></script>
 </body>
 </html>
 
@@ -316,7 +312,7 @@ function getUIOpacity() {
     return localStorage.getItem('ui-opacity') || '0.95';
 }
 
-function setUIOpacity(opacity) {
+function setUIOpacity(opacity: string) {
     localStorage.setItem('ui-opacity', opacity);
     document.documentElement.style.setProperty('--ui-opacity', opacity);
 }
@@ -680,3 +676,5 @@ if (window.swup) {
 	document.addEventListener("swup:enable", setup)
 }
 </script>
+</body>
+</html>
