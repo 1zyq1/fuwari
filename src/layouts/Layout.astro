@@ -207,6 +207,24 @@ const uiOpacity =
 
 <!-- 引入 JS 文件 -->
 <script src="https://api.hypcvgm.top/NeteaseMiniPlayer/netease-mini-player-v2.js"></script>
+
+<!-- User provided script for Netease Mini Player initialization -->
+<script is:inline>
+// 自动初始化（推荐）
+// 播放器会在 DOM 加载完成后自动初始化
+
+// 手动初始化
+document.addEventListener('DOMContentLoaded', function() {
+    const players = document.querySelectorAll('.netease-mini-player');
+    players.forEach(playerElement => {
+        new NeteaseMiniPlayer(playerElement);
+    });
+});
+
+// 单个播放器初始化
+const playerElement = document.querySelector('#my-player');
+const player = new NeteaseMiniPlayer(playerElement);
+</script>
 </body>
 </html>
 <style is:global define:vars={{
@@ -464,7 +482,7 @@ function initCustomScrollbar() {
 function showBanner() {
 	if (!siteConfig.banner.enable) return;
 
-	const banner = document.getElementById('banner');
+	const banner = document.getElementById('banner-wrapper'); // Changed from 'banner' to 'banner-wrapper' based on CSS
 	if (!banner) {
 		console.error('Banner element not found');
 		return;
@@ -541,7 +559,7 @@ const setup = () => {
 		// hide the temp high element when the transition is done
 		const heightExtend = document.getElementById('page-height-extend')
 		if (heightExtend) {
-			heightExtend.classList.remove('hidden')
+			heightExtend.classList.add('hidden')
 		}
 	});
 	window.swup.hooks.on('visit:end', (_visit: {to: {url: string}}) => {
@@ -626,7 +644,7 @@ function createPhotoSwipe() {
 	lightbox = new PhotoSwipeLightbox({
 		gallery: ".custom-md img, #post-cover img",
 		pswpModule: () => pswp,
-		closeSVG: '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#ffffff"><path d="M480-424 284-228q-11-11-28-11t-28 11q-11 11-11 28t11 28l196 196-196 196q-11 11-11 28t11 28q11 11 28 11t28-11l196-196 196 196q11 11 28 11t28-11q11-11 11-28t-11-28L536-480l196-196q11-11 11-28t-11-28q-11-11-28-11t-28 11L480-424Z"/></svg>',
+		closeSVG: '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#ffffff"><path d="M480-424 284-228q-11-11-28-11t-28 11q-11 11-11 28t11 28l196 196-196 196q-11 11-11 28t11 28q11 11 28 11t28-11l196-196 196 196q11 11 11 28t-11 28q-11-11-28-11t-28 11L536-480l196-196q11-11 11-28t-11-28q-11-11-28-11t-28 11L480-424Z"/></svg>',
 		zoomSVG: '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#ffffff"><path d="M340-540h-40q-17 0-28.5-11.5T260-580q0-17 11.5-28.5T300-620h40v-40q0-17 11.5-28.5T380-700q17 0 28.5 11.5T420-660v40h40q17 0 28.5 11.5T500-580q0 17-11.5 28.5T460-540h-40v40q0 17-11.5 28.5T380-460q-17 0-28.5-11.5T340-500v-40Zm40 220q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l224 224q11 11 11 28t-11 28q-11 11-28 11t-28-11L532-372q-30 24-69 38t-83 14Zm0-80q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/></svg>',
 		padding: { top: 20, bottom: 20, left: 20, right: 20 },
 		wheelToZoom: true,
@@ -679,3 +697,80 @@ if (window.swup) {
 </script>
 </body>
 </html>
+<style is:global define:vars={{
+	bannerOffset,
+	'banner-height-home': `${BANNER_HEIGHT_HOME}vh`,
+	'banner-height': `${BANNER_HEIGHT}vh`,
+}}>
+@tailwind components;
+@layer components {
+	/* 全屏背景样式 */
+	body {
+		position: relative;
+	}
+	
+	body::before {
+		content: '';
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		z-index: -1;
+		opacity: var(--bg-opacity, 0.5);
+	}
+	
+	.content-container {
+		position: relative;
+		z-index: 1;
+	}
+
+	/* 原有样式保持不变 */
+	.enable-banner.is-home #banner-wrapper {
+		@apply h-[var(--banner-height-home)] translate-y-[var(--banner-height-extend)]
+	}
+	.enable-banner #banner-wrapper {
+		@apply h-[var(--banner-height-home)]
+	}
+
+	.enable-banner.is-home #banner {
+		@apply h-[var(--banner-height-home)] translate-y-0
+	}
+	.enable-banner #banner {
+		@apply h-[var(--banner-height-home)] translate-y-[var(--bannerOffset)]
+	}
+	.enable-banner.is-home #main-grid {
+		@apply translate-y-[var(--banner-height-extend)];
+	}
+	.enable-banner #top-row {
+		@apply h-[calc(var(--banner-height-home)_-_4.5rem)] transition-all duration-300
+	}
+	.enable-banner.is-home #sidebar-sticky {
+		@apply top-[calc(1rem_-_var(--banner-height-extend))]
+	}
+	.navbar-hidden {
+		@apply opacity-0 -translate-y-16
+	}
+	
+	/* 为各个UI组件添加透明度支持 */
+	#navbar-wrapper {
+		opacity: var(--ui-opacity, 0.95);
+		backdrop-filter: blur(8px);
+	}
+	
+	#sidebar, .sidebar {
+		opacity: var(--ui-opacity, 0.95);
+		backdrop-filter: blur(5px);
+	}
+	
+	.card, .post-card, .content-card {
+		opacity: var(--ui-opacity, 0.95);
+		backdrop-filter: blur(3px);
+	}
+	
+	footer {
+		opacity: var(--ui-opacity, 0.9);
+		backdrop-filter: blur(5px);
+	}
+}
+</style>
