@@ -40,6 +40,11 @@ export const siteConfig: SiteConfig = {
 		depth: 2,
 	},
 	favicon: [],
+
+	officialSites: [
+		{ url: "https://www.1zyq1.top", alias: "netlify" },
+		{ url: "https://blog.1zyq1.top", alias: "cloudflare减速云" },
+	],
 };
 
 export const navBarConfig: NavBarConfig = {
